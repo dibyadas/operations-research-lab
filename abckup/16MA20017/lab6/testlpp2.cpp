@@ -34,7 +34,7 @@ vector< vector<float> > get_combination(vector<EQN> eqns, int num_eqns, int num_
 		float *sol = new float[num_eqns];
 		for(int j = 0; j < 2; j ++ ){
 
-		  	vector<int> mat_coeffs = eqns[comb[i][j]].prep_gauss();
+		  	vector<float> mat_coeffs = eqns[comb[i][j]].prep_gauss();
 		  	for (int p = 0; p < mat_coeffs.size(); ++p)
 		  	{
 		  		mat[j][p] = mat_coeffs[p];
@@ -83,7 +83,28 @@ vector< vector<float> > get_combination(vector<EQN> eqns, int num_eqns, int num_
 
 }
 
-void simplex(vector<EQN> eqns, int num_eqns, int num_vars){
+void dprint(string s, int counter, int iter){
+	if (counter == iter)
+	{
+		cout << s;
+	}
+}
+
+void dprint(float s, int counter, int iter){
+	if (counter == iter)
+	{
+		cout << s;
+	}
+}
+
+void dprint(int s, int counter, int iter){
+	if (counter == iter)
+	{
+		cout << s;
+	}
+}
+
+int simplex(vector<EQN> eqns, int num_eqns, int num_vars, EQN opt, int iter){
 
 	int num_slack_vars = num_eqns;
 
@@ -97,7 +118,7 @@ void simplex(vector<EQN> eqns, int num_eqns, int num_vars){
 
 	for (int i = 0; i < num_eqns; ++i)
 	{	
-		vector<int> mat_coeffs = eqns[i].prep_gauss();
+		vector<float> mat_coeffs = eqns[i].prep_gauss();
 		for (int j = 0; j < num_vars; ++j)
 		{	
 			mat[i][j] = mat_coeffs[j];
@@ -105,29 +126,61 @@ void simplex(vector<EQN> eqns, int num_eqns, int num_vars){
 		mat[i][num_vars] = mat_coeffs[num_vars];
 	}
 
-	cout << "Enter optimizing function as ( = 0) :- ";
-	EQN opt = EQN(num_vars);
-	vector<int> mat_coeffs = opt.prep_gauss();
+	vector<float> mat_coeffs = opt.prep_gauss();
 	for (int i = 0; i < num_vars; ++i)
 	{
 		mat[num_eqns][i] = 	-mat_coeffs[i];
 	}
 	mat[num_eqns][num_vars] = 0;
-	cout << endl;
 
+	map<int, string> map_basic;
+	map<int, string> map_non_basic;
+
+	for (int i = 0; i < num_vars; ++i)
+	{
+		map_non_basic[i] = "x" + to_string(i+1);
+	}
+	map_non_basic[num_vars] = "1";
+
+	for (int i = 0; i < num_eqns; ++i)
+	{
+		map_basic[i] = "z" + to_string(i+1);
+	}
+	map_basic[num_eqns] = "z";
+
+	
+	int counter = 0;
 	int flag = 0;
-	cout << "Initial Simplex Tableau" <<  endl;
+	// cout << "Initial Simplex Tableau" <<  endl;
+	dprint("Initial Simplex Tableau", counter, iter);
 	while(1){
 
-		cout << "New iteration " <<  endl <<  endl <<  endl;
+		dprint("\n", counter, iter);
+
+		for (int i = 0; i < num_vars + 1; ++i)
+		{
+			dprint(map_non_basic[i], counter, iter);
+			dprint("   ", counter, iter);
+		}
+		dprint("\n", counter, iter);
+
+		for (int i = 0; i < num_eqns + 1; ++i)
+		{
+			dprint(map_basic[i], counter, iter);
+			dprint("   ", counter, iter);
+		}
+		
+		dprint("\n", counter, iter);		
+
+		dprint("New iteration \n", counter, iter);
 		for (int i = 0; i < num_eqns + 1; ++i)
 			{
 				for (int j = 0; j < num_vars + 1; ++j)
 				{
-					// cin >> 
-					cout << mat[i][j] << "      ";
+					dprint(mat[i][j], counter, iter);
+					dprint("   ", counter, iter);
 				}
-				cout << endl;
+				dprint("\n", counter, iter);
 			}
 
 		int trap_flag = 0;
@@ -144,10 +197,11 @@ void simplex(vector<EQN> eqns, int num_eqns, int num_vars){
 
 		if (trap_flag == 0)
 		{
-			cout << "Solved" << endl;
+			dprint("Solved\n", counter, iter);
 			break;
 		}
 
+		counter++;
 
 		Point pivot;
 		vector<float> min_ratios;
@@ -167,19 +221,33 @@ void simplex(vector<EQN> eqns, int num_eqns, int num_vars){
 		}
 		min_ratios.push_back(0);
 
-		printf("\nPivot element is %f at :- (%d,%d)\n", mat[pivot.x][pivot.y], pivot.x,pivot.y );
+		// string l = sprintf("\nPivot element is %f at :- (%d,%d)\n", , pivot.x,pivot.y );
+		dprint("\nPivot element is ",counter, iter);
+		dprint(mat[pivot.x][pivot.y],counter, iter);
+		dprint(" at :- (",counter, iter);
+		dprint(pivot.x,counter, iter);
+		dprint(" , ",counter, iter);
+		dprint(pivot.y,counter, iter);
+		dprint(" ) ",counter, iter);
+		dprint(" \n",counter, iter);
+		// dprint(s, counter, iter);
 		float pivot_elem = mat[pivot.x][pivot.y];
 
-		cout << endl << "Tableau with ratios :- " << endl;
+		auto temp = map_basic[pivot.x];
+		map_basic[pivot.x] = map_non_basic[pivot.y];
+		map_non_basic[pivot.y] = temp;
+
+		dprint("\n Tableau with ratios :- ", counter, iter);
 
 		for (int i = 0; i < num_eqns + 1; ++i)
 		{
 			for (int j = 0; j < num_vars + 1; ++j)
 			{
 				// cin >> 
-				cout << mat[i][j] << "     ";
+				dprint(mat[i][j], counter, iter);
+				dprint("   ", counter, iter);
 			}
-			cout << min_ratios[i];
+			dprint(min_ratios[i], counter, iter);
 			cout << endl;
 		}
 
@@ -188,10 +256,7 @@ void simplex(vector<EQN> eqns, int num_eqns, int num_vars){
 		// cout << "Pivot element is at :- (" << pivot.x << "," << pivot.y << " )"
 		// cout << " x " << ;
 		// cout << " y " << pivot.y;
-		// cout << endl;
-
 		
-
 		float **new_mat = (float **)malloc((num_eqns + 1)*sizeof(float *));
 		for (int i = 0; i < num_eqns + 1; ++i)
 		{
@@ -237,14 +302,19 @@ void simplex(vector<EQN> eqns, int num_eqns, int num_vars){
 			for (int j = 0; j < num_vars + 1; ++j)
 			{
 				// cin >> 
-				cout << new_mat[i][j] << "     ";
+				dprint(new_mat[i][j], counter, iter);
+				dprint("   ", counter, iter);
 			}
 			cout << endl;
 		}
 
 		mat = new_mat;
-	}
 
+		if(counter >= 100){
+			return counter;
+		}
+	}
+	return counter;
 }
 
 
@@ -263,52 +333,42 @@ int main(int argc, char const *argv[])
  		eqns.push_back(e1);
  	}
 
- 	simplex(eqns, num_eqns, num_vars);
+	cout << "Enter optimizing function as ( = 0) :- ";
+	EQN opt = EQN(num_vars);
 
- 	vector< vector<float> > feasible = get_combination(eqns, num_eqns, num_vars);
+	cout << endl;
+	cout << "Enter 1 for listing all BFS \n";
+	cout << "Enter 2 for checking number of iterations needed to solve \n";
+	cout << "Enter 3 for list of Non-basic variables along with net evaluations in ith iteration \n";
+	cout << "Enter 4 for list of Basic variables along with min ratios in ith iteration \n";
+	cout << "Enter 5 for simplex table of ith iteration \n";
+	cout << "Enter 6 for optimal solution \n";
+	cout << "Enter 7 to exit \n";
+	cout << "Input choice :- ";
+	int choice;
+	cin >> choice;
 
- 	for(auto i : feasible){
- 		for(auto j : i){
- 			cout << j << " ";
- 		}
- 		cout << endl;
- 	}
-
- 	cout << "Enter optimizing expression with  (= 0) as the type and bias:- ";
- 	EQN e2 = EQN(num_vars);
- 	cout << "Enter 1 for maximize and -1 for minimize :- ";
- 	int control;
- 	cin >> control;
- 	int sol_index = -99999;
- 	float minsum = 999999;
- 	float maxsum = -999999;
- 	for (int i = 0; i < feasible.size(); ++i)
- 	{	
- 		if(control == 1){
- 			float temp = e2.compute(feasible[i]);
- 			if(temp > maxsum){
- 				maxsum = temp;
- 				sol_index = i;
- 			}
-
- 		} else if(control == -1){
- 			float temp = e2.compute(feasible[i]);
- 			if(temp < minsum){
- 				minsum = temp;
- 				sol_index = i;
- 			}
- 		}
- 		
- 	}
- 	cout << "The feasible solution for the system is :- " << endl;
- 	if(sol_index == -99999){
- 		cout << "No optimum solution";
- 	} else{
- 		auto feee = feasible[sol_index];
-	 	for(auto val : feee ){
-	 		cout << val << " ";
-	 	}	
- 	}
- 	
+	while(choice != 7){
+		if (choice == 1) {
+			cout << "\n";
+		} 
+		else if (choice == 2) {
+			auto count = simplex(eqns, num_eqns, num_vars, opt, 101);
+			if(count < 100){
+				cout << "Took " << count << " iterations to solve the system";
+			} else {
+				cout << "Cannot solve (Exceeding 100 iterations)";
+			}
+		}
+		else if (choice == 3) {
+			int iter;
+			cout << "Enter iter number to show :- ";
+			cin >> iter;
+			auto count2 = simplex(eqns, num_eqns, num_vars, opt, iter);
+		}
+		cout << endl;
+		cin >> choice;
+	}
+ 	// simplex(eqns, num_eqns, num_vars, opt);
  	cout << endl;
  } 
