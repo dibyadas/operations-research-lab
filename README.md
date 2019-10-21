@@ -11,4 +11,4 @@ It contains assignment on
   - Game Theory
 
 Here we use C++ as a programing language.
-Lots of assignments are given here to practice.
+Lots of assignments are also given here to practice.
