@@ -1,4 +1,4 @@
-** OPERATIONS RESEARCH LAB **
+**OPERATIONS RESEARCH LAB**
 
 The aim this lab is to make you able to solve Linear Optimization problems with the help of computer programming.
 It contains assignment on 
