@@ -1,4 +1,4 @@
-**OPERATIONS RESEARCH LAB**
+# Operations Research Lab (MA39014), IIT Kharagpur coursework.
 
 The aim of this lab is to make you able to solve Linear Optimization problems with the help of computer programming.
 It contains assignment on 
